@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studentské volby</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600&display=swap">
+<style>
+/* Layout: oversized headline over a clean poster wall. Strictly monochrome, so the only colour on the page comes from the parties' posters and none of them is favoured. */
+:root {
+  --bg: #f2f3f5; --surface: #ffffff; --fg: #101215; --muted: #5d636b; --line: #dcdfe3;
+  --cta: #101215; --on-cta: #ffffff; --off: #e1e3e7; --on-off: #565c64; --shadow: rgba(16, 18, 21, .16);
+  --v-bg: #0d0e10; --v-panel: #1b1d21; --v-fg: #f4f5f6; --v-muted: #a4a9b0; --v-line: #33363c; --v-cta: #ffffff; --v-on-cta: #0d0e10;
+  --display: "Bricolage Grotesque", "Segoe UI", Arial, sans-serif; --body: "Onest", "Segoe UI", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1113; --surface: #1a1c20; --fg: #f3f4f6; --muted: #a2a8b0; --line: #2d3036;
+  --cta: #f3f4f6; --on-cta: #0f1113; --off: #2a2d32; --on-off: #b0b5bc; --shadow: rgba(0, 0, 0, .55); color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0f1113; --surface: #1a1c20; --fg: #f3f4f6; --muted: #a2a8b0; --line: #2d3036;
+  --cta: #f3f4f6; --on-cta: #0f1113; --off: #2a2d32; --on-off: #b0b5bc; --shadow: rgba(0, 0, 0, .55); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 1rem/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1400px; margin-inline: auto; padding-block: clamp(32px, 6vw, 72px) 56px; padding-left: max(16px, env(safe-area-inset-left, 0px), 3vw); padding-right: max(16px, env(safe-area-inset-right, 0px), 3vw); display: grid; gap: clamp(32px, 5vw, 56px); }
+.hero { display: grid; gap: 20px; }
+.status { justify-self: start; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: .875rem; font-weight: 500; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.status.live::before { background: var(--fg); }
+h1 { margin: 0; font: 800 clamp(3rem, 10.5vw, 8.5rem)/.92 var(--display); letter-spacing: -.035em; text-wrap: balance; }
+.lead { margin: 0; max-width: 56ch; font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(16px, 2vw, 28px); }
+.card { display: grid; grid-template-rows: auto 1fr auto; gap: 14px; min-width: 0; }
+.poster { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 16px; overflow: hidden; background: var(--surface); cursor: zoom-in; box-shadow: 0 10px 30px -12px var(--shadow); transition: transform .25s ease, box-shadow .25s ease; }
+.poster:hover { transform: translateY(-6px); box-shadow: 0 24px 44px -16px var(--shadow); }
+.poster img { display: block; width: 100%; aspect-ratio: 5 / 7; object-fit: contain; }
+.actions { display: grid; gap: 8px; }
+.chip { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 20px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--fg); font: 600 1rem/1.2 var(--body); cursor: pointer; }
+.chip:hover { border-color: var(--fg); }
+.chip svg { width: 16px; height: 16px; }
+.card h2 { margin: 0; font: 600 1.35rem/1.15 var(--display); letter-spacing: -.015em; text-wrap: balance; }
+.card small { display: block; margin-top: 4px; font: 400 .925rem/1.3 var(--body); letter-spacing: 0; color: var(--muted); }
+.vote { display: block; padding: 14px 20px; border: 0; border-radius: 999px; background: var(--cta); color: var(--on-cta); font: 600 1rem/1.2 var(--body); text-align: center; text-decoration: none; transition: transform .15s ease; }
+.vote:hover { transform: scale(1.02); }
+.vote[aria-disabled="true"] { background: var(--off); color: var(--on-off); cursor: not-allowed; transform: none; }
+.how { display: grid; gap: 24px; padding-top: 28px; border-top: 1px solid var(--line); }
+.how h2 { margin: 0; font: 600 1.35rem/1.15 var(--display); letter-spacing: -.015em; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); counter-reset: s; }
+.steps li { counter-increment: s; display: grid; gap: 6px; min-width: 0; }
+.steps li::before { content: counter(s); font: 800 2rem/1 var(--display); }
+.foot { margin: 0; max-width: 70ch; font-size: .925rem; color: var(--muted); }
+:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+
+dialog { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--v-bg); color: var(--v-fg); color-scheme: dark; }
+dialog[open] { display: flex; flex-direction: column; }
+dialog::backdrop { background: var(--v-bg); }
+dialog :focus-visible { outline-color: var(--v-fg); }
+.top, .dock { flex: none; display: flex; align-items: center; gap: 10px; padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
+.top { justify-content: space-between; padding-top: max(12px, env(safe-area-inset-top, 0px)); padding-bottom: 12px; }
+.top strong { min-width: 0; font: 600 1.15rem/1.2 var(--display); }
+.dock { flex-wrap: wrap; justify-content: center; padding-top: 12px; padding-bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+.scroller { flex: 1 1 auto; min-height: 0; overflow: auto; cursor: grab; }
+.scroller.dragging { cursor: grabbing; user-select: none; }
+dialog img { display: block; max-width: none; height: auto; margin-inline: auto; }
+.pill { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: var(--v-panel); border: 1px solid var(--v-line); }
+.icon { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--v-fg); cursor: pointer; }
+.icon svg { width: 20px; height: 20px; }
+.icon:hover:not(:disabled) { background: var(--v-line); }
+.icon:disabled { color: var(--v-line); cursor: default; }
+#close { background: var(--v-panel); border: 1px solid var(--v-line); flex: none; }
+.level { min-width: 4em; text-align: center; font-size: .925rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.dock .vote { background: var(--v-cta); color: var(--v-on-cta); }
+.dock .vote[aria-disabled="true"] { background: var(--v-panel); color: var(--v-muted); border: 1px solid var(--v-line); }
+
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .steps { grid-template-columns: minmax(0, 1fr); } .dock .vote { flex: 1 1 100%; } }
+@media (max-width: 480px) { .grid { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
+@media (prefers-reduced-motion: reduce) { .poster, .vote { transition: none; } .poster:hover, .vote:hover { transform: none; } }
+</style>
+
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <span class="status" id="status">Hlasování ještě nezačalo</span>
+    <h1>Studentské volby</h1>
+    <p class="lead">Prohlédněte si plakáty čtyř stran a dejte hlas jedné z nich. Plakáty vytvořili studenti. Jde o školní hlasování, ne o skutečné volby.</p>
+  </header>
+
+  <section class="grid" id="grid" aria-label="Kandidující strany"></section>
+
+  <section class="how">
+    <h2>Jak hlasovat</h2>
+    <ol class="steps">
+      <li><span>Otevřete plakáty a přečtěte si je. Zvětšit je můžete až na 300 %.</span></li>
+      <li><span>U vybrané strany klikněte na tlačítko Hlasovat.</span></li>
+      <li><span>Ve formuláři zkontrolujte volbu a odešlete ji. Teprve tím hlas platí.</span></li>
+    </ol>
+    <p class="foot">Pořadí stran je při každém otevření stránky náhodné. K hlasování potřebujete účet Google a každý účet může hlasovat jen jednou.</p>
+  </section>
+</main>
+
+<dialog id="zoom" aria-labelledby="zoom-name">
+  <div class="top">
+    <strong id="zoom-name"></strong>
+    <button class="icon" id="close" type="button" aria-label="Zavřít"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="scroller" id="scroller" tabindex="0"><img id="zoom-img" alt=""></div>
+  <div class="dock">
+    <div class="pill">
+      <button class="icon" id="prev" type="button" aria-label="Předchozí plakát"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="icon" id="next" type="button" aria-label="Další plakát"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="pill">
+      <button class="icon" id="out" type="button" aria-label="Zmenšit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      <span class="level" id="level" aria-live="polite">100 %</span>
+      <button class="icon" id="in" type="button" aria-label="Zvětšit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button>
+    </div>
+    <span class="vote" id="vote-slot" hidden></span>
+  </div>
+</dialog>
+
+<script>
+/* Doplňte po vytvoření formuláře: adresa končící /viewform a číslo z parametru entry.… v předvyplněném odkazu. */
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdM9VIp45GlLjHTJrdbpQc6RATImgCo0GdxoY2_EDE7QnSuug/viewform";
+const ENTRY_ID = "1756623471";
+
+const parties = [
+  { value: "HSR", name: "HSR", full: "Hnutí za sociální rozvoj", img: "hsr.jpg", alt: "Plakát HSR s heslem Budoucnost, kterou si můžeme dovolit: dostupné bydlení, důchody a mladí, levnější energie, odpovědné hospodaření." },
+  { value: "Občanská prosperita", name: "Občanská prosperita", full: "", img: "op.jpg", alt: "Plakát Občanské prosperity s heslem Stát, který nepřekáží: odpovědné hospodaření, dostupnější bydlení, méně byrokracie, snazší podnikání." },
+  { value: "Pro Radost Občanů", name: "PRO", full: "Pro Radost Občanů", img: "pro.jpg", alt: "Plakát strany PRO s heslem Budoucnost pro občany: dostupné bydlení, kvalitnější vzdělávání a rekvalifikační kurzy, podpora podnikání." },
+  { value: "Hlas Česka", name: "Hlas Česka", full: "", img: "hlas.jpg", alt: "Plakát Hlasu Česka s heslem Spravedlivé Česko pro každého: dostupné bydlení, spravedlivé daně, aktivní a důstojné stáří, levnější energie, zdravá a dobře placená práce." }
+];
+
+const ready = Boolean(FORM_URL && ENTRY_ID);
+const voteUrl = p => `${FORM_URL}?usp=pp_url&entry.${ENTRY_ID}=${encodeURIComponent(p.value)}`;
+
+function voteControl(p) {
+  const a = document.createElement("a");
+  a.className = "vote";
+  if (ready) { a.href = voteUrl(p); a.target = "_blank"; a.rel = "noopener"; a.textContent = "Hlasovat"; a.setAttribute("aria-label", `Hlasovat: ${p.name}`); }
+  else { a.setAttribute("aria-disabled", "true"); a.textContent = "Hlasování nezačalo"; }
+  return a;
+}
+
+/* Fisher–Yates: žádná strana nemá trvale výhodu prvního místa. */
+for (let i = parties.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [parties[i], parties[j]] = [parties[j], parties[i]];
+}
+
+const grid = document.getElementById("grid");
+const zoom = document.getElementById("zoom");
+const scroller = document.getElementById("scroller");
+const LEVELS = [1, 1.5, 2, 3];
+let current = 0;
+let level = 0;
+
+/* 100 % = plakát na šířku okna, na velké obrazovce nejvýš 900 px. */
+function applyZoom() {
+  const base = Math.min(scroller.clientWidth || window.innerWidth, 900);
+  const cx = scroller.scrollWidth ? (scroller.scrollLeft + scroller.clientWidth / 2) / scroller.scrollWidth : .5;
+  const cy = scroller.scrollHeight ? (scroller.scrollTop + scroller.clientHeight / 2) / scroller.scrollHeight : 0;
+  document.getElementById("zoom-img").style.width = `${Math.round(base * LEVELS[level])}px`;
+  scroller.scrollLeft = cx * scroller.scrollWidth - scroller.clientWidth / 2;
+  scroller.scrollTop = cy * scroller.scrollHeight - scroller.clientHeight / 2;
+  document.getElementById("level").textContent = `${Math.round(LEVELS[level] * 100)} %`;
+  document.getElementById("out").disabled = level === 0;
+  document.getElementById("in").disabled = level === LEVELS.length - 1;
+}
+
+function show(i) {
+  current = (i + parties.length) % parties.length;
+  const p = parties[current];
+  document.getElementById("zoom-name").textContent = p.full ? `${p.name} – ${p.full}` : p.name;
+  const img = document.getElementById("zoom-img");
+  img.src = p.img.replace(".jpg", "-velky.jpg"); img.alt = p.alt;
+  zoom.querySelector(".dock .vote").replaceWith(voteControl(p));
+  applyZoom();
+  scroller.scrollTop = 0;
+}
+
+function openPoster(i) {
+  level = 0;
+  zoom.showModal();
+  show(i);
+}
+
+parties.forEach((p, i) => {
+  const card = document.createElement("article");
+  card.className = "card";
+  const btn = document.createElement("button");
+  btn.className = "poster"; btn.type = "button";
+  btn.setAttribute("aria-label", `Zvětšit a číst plakát: ${p.name}`);
+  const img = document.createElement("img");
+  img.src = p.img; img.alt = p.alt;
+  const chip = document.createElement("button");
+  chip.className = "chip"; chip.type = "button";
+  chip.setAttribute("aria-label", `Zvětšit a číst plakát: ${p.name}`);
+  chip.addEventListener("click", () => openPoster(i));
+  chip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg>Zvětšit a číst';
+  btn.append(img);
+  const actions = document.createElement("div");
+  actions.className = "actions";
+  actions.append(chip, voteControl(p));
+  btn.addEventListener("click", () => openPoster(i));
+  const h = document.createElement("h2");
+  h.textContent = p.name;
+  if (p.full) { const s = document.createElement("small"); s.textContent = p.full; h.append(s); }
+  card.append(btn, h, actions);
+  grid.append(card);
+});
+
+const status = document.getElementById("status");
+if (ready) { status.textContent = "Hlasování probíhá"; status.classList.add("live"); }
+
+document.getElementById("prev").addEventListener("click", () => show(current - 1));
+document.getElementById("next").addEventListener("click", () => show(current + 1));
+document.getElementById("close").addEventListener("click", () => zoom.close());
+document.getElementById("in").addEventListener("click", () => { level = Math.min(level + 1, LEVELS.length - 1); applyZoom(); });
+document.getElementById("out").addEventListener("click", () => { level = Math.max(level - 1, 0); applyZoom(); });
+window.addEventListener("resize", () => { if (zoom.open) applyZoom(); });
+
+/* Posouvání zvětšeného plakátu tažením myší. Na dotykovém displeji stačí běžné posouvání prstem. */
+let drag = null;
+scroller.addEventListener("pointerdown", e => {
+  if (e.pointerType !== "mouse") return;
+  drag = { x: e.clientX, y: e.clientY, l: scroller.scrollLeft, t: scroller.scrollTop };
+  scroller.classList.add("dragging");
+  e.preventDefault();
+});
+window.addEventListener("pointermove", e => {
+  if (!drag) return;
+  scroller.scrollLeft = drag.l - (e.clientX - drag.x);
+  scroller.scrollTop = drag.t - (e.clientY - drag.y);
+});
+window.addEventListener("pointerup", () => { drag = null; scroller.classList.remove("dragging"); });
+</script>
+</body>
+</html>
